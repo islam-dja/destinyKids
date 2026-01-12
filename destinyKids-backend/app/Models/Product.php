@@ -20,20 +20,28 @@ class Product extends Model
         'age_group_id',
         'name',
         'slug',
+        'sku',
+        'short_description',
         'description',
         'price',
-        'compare_at_price',
-        'stock',
-        'sku',
-        'barcode',
-        'tags',
+        'compare_price',
+        'cost_price',
+        'age_group',
+        'stock_quantity',
+        'low_stock_threshold',
+        'track_stock',
         'is_featured',
-        'is_visible',
+        'is_published',
+        'is_b2b_eligible',
+        'b2b_price',
+        'min_b2b_quantity',
+        'weight_grams',
+        'dimensions',
         'images',
         'main_image',
+        'attributes',
         'meta_title',
         'meta_description',
-        'meta_keywords',
     ];
 
     /**
@@ -43,12 +51,18 @@ class Product extends Model
      */
     protected $casts = [
         'price' => 'decimal:2',
-        'compare_at_price' => 'decimal:2',
-        'stock' => 'integer',
+        'compare_price' => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'b2b_price' => 'decimal:2',
+        'stock_quantity' => 'integer',
+        'low_stock_threshold' => 'integer',
+        'track_stock' => 'boolean',
         'is_featured' => 'boolean',
-        'is_visible' => 'boolean',
-        'tags' => 'array',
+        'is_published' => 'boolean',
+        'is_b2b_eligible' => 'boolean',
+        'dimensions' => 'array',
         'images' => 'array',
+        'attributes' => 'array',
     ];
 
     /**
@@ -68,11 +82,11 @@ class Product extends Model
     }
 
     /**
-     * Scope a query to only include visible products.
+     * Scope a query to only include published products.
      */
-    public function scopeVisible($query)
+    public function scopePublished($query)
     {
-        return $query->where('is_visible', true);
+        return $query->where('is_published', true);
     }
 
     /**
@@ -88,7 +102,7 @@ class Product extends Model
      */
     public function scopeInStock($query)
     {
-        return $query->where('stock', '>', 0);
+        return $query->where('stock_quantity', '>', 0);
     }
 
     /**
@@ -108,8 +122,8 @@ class Product extends Model
      */
     public function getSalePercentageAttribute()
     {
-        if ($this->compare_at_price && $this->compare_at_price > $this->price) {
-            return round((($this->compare_at_price - $this->price) / $this->compare_at_price) * 100);
+        if ($this->compare_price && $this->compare_price > $this->price) {
+            return round((($this->compare_price - $this->price) / $this->compare_price) * 100);
         }
         
         return 0;
@@ -120,7 +134,7 @@ class Product extends Model
      */
     public function getIsOnSaleAttribute()
     {
-        return $this->compare_at_price && $this->compare_at_price > $this->price;
+        return $this->compare_price && $this->compare_price > $this->price;
     }
 
     /**
@@ -128,7 +142,7 @@ class Product extends Model
      */
     public function getIsLowStockAttribute()
     {
-        return $this->stock > 0 && $this->stock <= 10;
+        return $this->stock_quantity > 0 && $this->stock_quantity <= $this->low_stock_threshold;
     }
 
     /**
@@ -136,6 +150,6 @@ class Product extends Model
      */
     public function getIsOutOfStockAttribute()
     {
-        return $this->stock <= 0;
+        return $this->stock_quantity <= 0;
     }
 }

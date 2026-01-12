@@ -42,10 +42,11 @@ Route::prefix('v1')->group(function () {
     
     // Cart routes (will be implemented in Phase 1)
     Route::prefix('cart')->group(function () {
-        Route::post('/add', [\App\Http\Controllers\Api\CartController::class, 'add']);
-        Route::patch('/update', [\App\Http\Controllers\Api\CartController::class, 'update']);
-        Route::delete('/remove', [\App\Http\Controllers\Api\CartController::class, 'remove']);
-        Route::get('/', [\App\Http\Controllers\Api\CartController::class, 'index']);
+        Route::post('/add', [\App\Http\Controllers\CartController::class, 'store']);
+        Route::patch('/update/{itemId}', [\App\Http\Controllers\CartController::class, 'update']);
+        Route::delete('/remove/{itemId}', [\App\Http\Controllers\CartController::class, 'destroy']);
+        Route::delete('/clear', [\App\Http\Controllers\CartController::class, 'clear']);
+        Route::get('/', [\App\Http\Controllers\CartController::class, 'index']);
     });
     
     // Checkout routes (will be implemented in Phase 1)

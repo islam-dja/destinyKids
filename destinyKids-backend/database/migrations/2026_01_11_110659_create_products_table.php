@@ -13,55 +13,42 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            
-            // Foreign key to categories
-            $table->foreignId('category_id')
-                  ->nullable()
-                  ->constrained('categories')
-                  ->nullOnDelete();
-            
-            // Product details
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            
-            // Pricing
-            $table->decimal('price', 10, 2); // 10 digits, 2 decimal places
-            $table->decimal('compare_at_price', 10, 2)->nullable(); // For sale prices
-            
-            // Stock management
-            $table->integer('stock')->default(0);
-            $table->string('sku')->unique()->nullable(); // Stock Keeping Unit
-            $table->string('barcode')->nullable();
-            
-            // Product attributes
-            $table->string('age_group')->nullable(); // e.g., '0-3', '3-6', '6-9', '9-12'
-            $table->json('tags')->nullable(); // For additional categorization
-            
-            // Status flags
+            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
+            $table->string('name', 200);
+            $table->string('slug', 220)->unique();
+            $table->string('sku', 50)->unique()->nullable();
+            $table->text('short_description')->nullable();
+            $table->longText('description')->nullable();
+            $table->decimal('price', 10, 2); // 10 digits total, 2 decimal places
+            $table->decimal('compare_price', 10, 2)->nullable(); // For showing "original price"
+            $table->decimal('cost_price', 10, 2)->nullable(); // For profit calculation
+            $table->string('age_group', 50)->nullable(); // e.g., '3-5 years', '6-8 years'
+            $table->integer('stock_quantity')->default(0);
+            $table->integer('low_stock_threshold')->default(5);
+            $table->boolean('track_stock')->default(true);
             $table->boolean('is_featured')->default(false);
-            $table->boolean('is_visible')->default(true);
-            $table->boolean('in_stock')->virtualAs('stock > 0');
-            
-            // Media
-            $table->json('images')->nullable(); // Array of image URLs
+            $table->boolean('is_published')->default(true);
+            $table->boolean('is_b2b_eligible')->default(false); // For future B2B pricing
+            $table->decimal('b2b_price', 10, 2)->nullable(); // Special price for B2B
+            $table->integer('min_b2b_quantity')->nullable(); // Minimum quantity for B2B price
+            $table->integer('weight_grams')->nullable(); // For shipping calculation
+            $table->json('dimensions')->nullable(); // {length, width, height} in cm
+            $table->json('images')->nullable(); // Array of image paths
             $table->string('main_image')->nullable();
-            
-            // SEO
+            $table->json('attributes')->nullable(); // Custom attributes as JSON
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
-            $table->string('meta_keywords')->nullable();
-            
-            // Timestamps
             $table->timestamps();
-            $table->softDeletes(); // For safe deletion
+            $table->softDeletes();
             
             // Indexes for performance
-            $table->index('category_id');
-            $table->index('price');
-            $table->index('is_featured');
-            $table->index('is_visible');
-            $table->index(['is_visible', 'in_stock']);
+            $table->index(['is_published', 'is_featured']);
+            $table->index(['category_id', 'is_published']);
+            $table->index(['price', 'is_published']);
+            $table->index(['stock_quantity', 'track_stock']);
+            $table->index(['created_at', 'is_published']);
+            $table->index('sku');
+            $table->index('age_group');
         });
     }
 

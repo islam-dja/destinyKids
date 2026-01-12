@@ -3,47 +3,56 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CheckoutRequest;
+use App\Http\Resources\OrderResource;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 
-class CheckoutController extends Controller
+class CheckoutController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $orderService;
+
+    public function __construct(OrderService $orderService)
     {
-        //
+        $this->orderService = $orderService;
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Handle the checkout process.
      */
-    public function store(Request $request)
+    public function store(CheckoutRequest $request)
     {
-        //
+        try {
+            $user = $request->user();
+            $sessionId = $this->getSessionId($request);
+
+            $order = $this->orderService->createOrderFromCart($user, $sessionId, $request->validated());
+
+            return $this->success(
+                new OrderResource($order),
+                'Order placed successfully.',
+                201
+            );
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    private function getSessionId(Request $request)
     {
-        //
-    }
+        if ($request->header('X-Guest-Token')) {
+            return $request->header('X-Guest-Token');
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        if ($request->hasSession()) {
+            $sessionId = $request->session()->getId();
+            if ($sessionId) {
+                return $sessionId;
+            }
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return 'guest_' . md5($request->ip() . $request->userAgent());
     }
 }
+
+

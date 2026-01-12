@@ -11,23 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('collections', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100);
             $table->string('slug', 120)->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-            $table->integer('parent_id')->nullable()->index();
-            $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
-            $table->string('meta_title')->nullable();
-            $table->text('meta_description')->nullable();
+            $table->integer('order')->default(0);
             $table->timestamps();
             $table->softDeletes();
             
-            // Indexes
             $table->index(['is_active', 'order']);
-            $table->index(['parent_id', 'is_active']);
+        });
+
+        // Pivot table for products and collections
+        Schema::create('collection_product', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('collection_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->integer('order')->default(0);
+            
+            $table->unique(['collection_id', 'product_id']);
+            $table->index(['collection_id', 'order']);
         });
     }
 
@@ -36,6 +42,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('collection_product');
+        Schema::dropIfExists('collections');
     }
 };
