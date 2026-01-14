@@ -2,52 +2,55 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
-
-const collections = [
-  {
-    name: "Traditional Dolls",
-    image: "/images/traditional-dolls.png",
-    href: "/collections",
-  },
-  { name: "Home Dolls", image: "/images/home-dolls.png", href: "/collections" },
-  {
-    name: "Educational Toys",
-    image: "/images/educational-toys.png",
-    href: "/collections",
-  },
-  { name: "Cars & Vehicles", image: "/images/cars.png", href: "/collections" },
-];
-
-const bestsellers = [
-  {
-    id: "kabyle-doll",
-    name: "Kabyle Doll",
-    price: 4200,
-    image: "/images/kabyle-doll.png",
-  },
-  {
-    id: "casbah-heritage",
-    name: "Casbah Heritage Doll",
-    price: 4800,
-    image: "/images/casbah-heritage-doll.png",
-  },
-  {
-    id: "bride-doll",
-    name: "Traditional Bride Doll",
-    price: 5500,
-    image: "/images/traditional-bride-doll.png",
-  },
-];
+import { fetchProducts } from "@/lib/api";
 
 export default function Home() {
   const { addToCart } = useCart();
+  const [bestsellers, setBestsellers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddToCart = (product: {
-    id: string;
-    name: string;
-    price: number;
-  }) => {
+  const collections = [
+    {
+      name: "Traditional Dolls",
+      image: "/images/traditional-dolls.png",
+      href: "/collections",
+    },
+    {
+      name: "Home Dolls",
+      image: "/images/home-dolls.png",
+      href: "/collections",
+    },
+    {
+      name: "Educational Toys",
+      image: "/images/educational-toys.png",
+      href: "/collections",
+    },
+    {
+      name: "Cars & Vehicles",
+      image: "/images/cars.png",
+      href: "/collections",
+    },
+  ];
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const resp = await fetchProducts("limit=3"); // Assuming backend supports limit
+        // Map backend product to frontend structure if necessary
+        // Backend typically returns { data: [...] }
+        setBestsellers(Array.isArray(resp?.data) ? resp.data : []);
+      } catch (err) {
+        console.error("Failed to fetch bestsellers:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const handleAddToCart = (product: any) => {
     addToCart({ ...product, qty: 1 });
   };
 

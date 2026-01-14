@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { submitWholesaleInquiry } from "@/lib/api";
 
 const benefits = [
   {
@@ -50,6 +51,7 @@ const processSteps = [
   },
 ];
 
+
 export default function WholesalePage() {
   const [formData, setFormData] = useState({
     businessName: "",
@@ -62,27 +64,44 @@ export default function WholesalePage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Map frontend to backend fields
+      const payload = {
+        company_name: formData.businessName,
+        contact_person: formData.contactName,
+        email: formData.email,
+        phone: formData.phone,
+        business_type: formData.businessType,
+        message: `Location: ${formData.location}\n\n${formData.message}`,
+      };
 
-    alert(
-      "Thank you for your inquiry! Our wholesale team will contact you within 24 hours."
-    );
-    setFormData({
-      businessName: "",
-      contactName: "",
-      email: "",
-      phone: "",
-      businessType: "",
-      location: "",
-      message: "",
-    });
-    setIsSubmitting(false);
+      await submitWholesaleInquiry(payload);
+
+      alert(
+        "Thank you for your inquiry! Our wholesale team will contact you within 24 hours."
+      );
+      setFormData({
+        businessName: "",
+        contactName: "",
+        email: "",
+        phone: "",
+        businessType: "",
+        location: "",
+        message: "",
+      });
+    } catch (err: any) {
+      console.error("Wholesale inquiry submission failed:", err);
+      setError(err.message || "Failed to send inquiry. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -238,6 +257,12 @@ export default function WholesalePage() {
               Fill out the form below and our team will get back to you within
               24 hours
             </p>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-xl">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

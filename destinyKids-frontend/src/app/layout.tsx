@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { CartProvider } from "@/contexts/CartContext";
+import ClientLayout from "./ClientLayout";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -33,11 +31,7 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} font-sans bg-[#f8f0f6] text-[#3d1b4e] antialiased`}
       >
-        <CartProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </CartProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

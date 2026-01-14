@@ -5,6 +5,7 @@ import { useCart } from "@/contexts/CartContext";
 import { getWilayas, getCommunes } from "@/data/algeria-cities";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { submitCheckout } from "@/lib/api";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function CheckoutPage() {
 
   const [communes, setCommunes] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const wilayas = getWilayas();
 
@@ -51,17 +53,36 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate order submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Map frontend camelCase to backend snake_case
+      const payload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        wilaya: formData.wilaya,
+        commune: formData.commune,
+        address: formData.address,
+        postal_code: formData.postalCode,
+        notes: formData.notes,
+      };
 
-    // Clear cart and redirect
-    clearCart();
-    alert(
-      "Order placed successfully! You will receive a confirmation email shortly."
-    );
-    router.push("/");
-    setIsSubmitting(false);
+      await submitCheckout(payload);
+
+      // Clear cart and redirect
+      clearCart();
+      alert(
+        "Order placed successfully! You will receive a confirmation email shortly."
+      );
+      router.push("/");
+    } catch (err: any) {
+      console.error("Order submission failed:", err);
+      setError(err.message || "Failed to place order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (cartItems.length === 0) {
@@ -99,6 +120,12 @@ export default function CheckoutPage() {
               <h2 className="text-3xl text-[#3d1b4e] mb-6">
                 Billing & Shipping Information
               </h2>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-xl">
+                  {error}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                 <div>

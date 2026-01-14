@@ -4,89 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 import Link from "next/link";
+import { fetchProducts } from "@/lib/api";
 
-const products = [
-  {
-    id: "kabyle-doll",
-    name: "Kabyle Doll",
-    price: 4200,
-    image: "/images/kabyle-doll.png",
-    category: "Traditional Dolls",
-    inStock: true,
-  },
-  {
-    id: "casbah-heritage",
-    name: "Casbah Heritage Doll",
-    price: 4800,
-    image: "/images/casbah-heritage-doll.png",
-    category: "Traditional Dolls",
-    inStock: true,
-  },
-  {
-    id: "bride-doll",
-    name: "Traditional Bride Doll",
-    price: 5500,
-    image: "/images/traditional-bride-doll.png",
-    category: "Traditional Dolls",
-    inStock: true,
-  },
-  {
-    id: "chaoui-doll",
-    name: "Chaoui Doll",
-    price: 4300,
-    image: "/images/chaoui-doll.png",
-    category: "Traditional Dolls",
-    inStock: true,
-  },
-  {
-    id: "mozabite-doll",
-    name: "Mozabite Doll",
-    price: 4600,
-    image: "/images/mozabite-doll.png",
-    category: "Traditional Dolls",
-    inStock: true,
-  },
-  {
-    id: "tlemcen-doll",
-    name: "Tlemcen Dress Doll",
-    price: 4900,
-    image: "/images/tlemcen-doll.png",
-    category: "Traditional Dolls",
-    inStock: true,
-  },
-  {
-    id: "home-doll-1",
-    name: "Home Comfort Doll",
-    price: 2800,
-    image: "/images/home-doll-1.png",
-    category: "Home Dolls",
-    inStock: true,
-  },
-  {
-    id: "home-doll-2",
-    name: "Cozy Home Doll",
-    price: 2900,
-    image: "/images/home-doll-2.png",
-    category: "Home Dolls",
-    inStock: true,
-  },
-  {
-    id: "educational-toy-1",
-    name: "Learning Set",
-    price: 3200,
-    image: "/images/educational-toy-1.png",
-    category: "Educational Toys",
-    inStock: true,
-  },
-  {
-    id: "car-1",
-    name: "Mini Race Car",
-    price: 1800,
-    image: "/images/car-1.png",
-    category: "Cars & Vehicles",
-    inStock: true,
-  },
-];
+// categories are fetched or kept as common defaults
 
 const categories = [
   "All",
@@ -105,9 +25,36 @@ const priceRanges = [
 
 export default function ShopPage() {
   const { addToCart } = useCart();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriceRange, setSelectedPriceRange] = useState(priceRanges[0]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const resp = await fetchProducts("per_page=100");
+        const mapped = (Array.isArray(resp?.data) ? resp.data : []).map(
+          (p: any) => ({
+            id: p.id,
+            slug: p.slug,
+            name: p.name,
+            price: p.price,
+            image: p.main_image || "/images/placeholder.png",
+            category: p.category?.name || "Uncategorized",
+            inStock: p.stock_status !== "out_of_stock",
+          })
+        );
+        setProducts(mapped);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [fixedLeft, setFixedLeft] = useState<number | null>(null);

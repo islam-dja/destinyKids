@@ -98,28 +98,30 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* NEWSLETTER */}
+        {/* SHOP LOCATION */}
         <div>
           <h4 className="text-lg mb-4 relative">
-            Stay in Touch
+            Our Shop
             <span className="block w-[30px] h-[3px] bg-[#e3a6d6] mt-1.5 rounded-[3px]"></span>
           </h4>
-          <p className="text-[15px] mb-4">
-            Receive updates on new collections & offers.
-          </p>
-          <form className="flex gap-2.5">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="flex-1 py-3 px-3.5 rounded-[30px] border-none outline-none text-black"
-            />
-            <button
-              type="submit"
-              className="bg-[#e3a6d6] text-[#2b0d2f] border-none py-3 px-[22px] rounded-[30px] cursor-pointer font-semibold hover:-translate-y-[2px] transition-transform"
-            >
-              Subscribe
-            </button>
-          </form>
+          <div className="mb-4">
+            <div className="bg-white/10 rounded-lg overflow-hidden">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.5!2d3.0588!3d36.7525!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128fb1b5c8b5c8b5%3A0x1234567890abcdef!2sAlgiers%2C%20Algeria!5e0!3m2!1sen!2s!4v1234567890123!5m2!1sen!2s"
+                width="100%"
+                height="150"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Destiny Kids Shop Location"
+                className="rounded-lg"
+              ></iframe>
+            </div>
+            <p className="text-[14px] mt-3 opacity-75">
+              📍 Algiers, Algeria
+            </p>
+          </div>
         </div>
       </div>
 
