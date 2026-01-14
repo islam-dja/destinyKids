@@ -1,10 +1,68 @@
-PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
 
-Runtime:       PHP 8.2.4
-Configuration: B:\destiny-Kids\destinyKids-backend\phpunit.xml
+   FAIL  Tests\Feature\WholesaleInquiryTest
+  ⨯ can submit wholesale inquiry publicly                                                                       13.23s  
+  ✓ public inquiry submission requires mandatory fields                                                          0.16s  
+  ✓ admin can list inquiries                                                                                     0.89s  
+  ✓ manager can list inquiries                                                                                   0.06s  
+  ✓ customer cannot list inquiries                                                                               0.06s  
+  ✓ admin can update inquiry status                                                                              0.06s  
+  ⨯ admin can bulk update inquiries                                                                              0.10s  
+  ⨯ admin can export inquiries                                                                                   0.10s  
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WholesaleInquiryTest > can submit wholesale inquiry publicly          BadMethodCallException   
+  Method Illuminate\Support\Testing\Fakes\NotificationFake::assertSentOnConnection does not exist.
 
-.....                                                               5 / 5 (100%)
+  at vendor\laravel\framework\src\Illuminate\Macroable\Traits\Macroable.php:115
+    111▕      */
+    112▕     public function __call($method, $parameters)
+    113▕     {
+    114▕         if (! static::hasMacro($method)) {
+  ➜ 115▕             throw new BadMethodCallException(sprintf(
+    116▕                 'Method %s::%s does not exist.', static::class, $method
+    117▕             ));
+    118▕         }
+    119▕
 
-Time: 00:21.889, Memory: 44.00 MB
+  1   vendor\laravel\framework\src\Illuminate\Macroable\Traits\Macroable.php:115
+  2   vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php:363
 
-OK (5 tests, 14 assertions)
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WholesaleInquiryTest > admin can bulk update inquiries                                         
+  Expected response status code [200] but received 404.
+Failed asserting that 404 is identical to 200.
+
+  at tests\Feature\WholesaleInquiryTest.php:141
+    137▕             'ids' => $ids,
+    138▕             'status' => 'contacted'
+    139▕         ]);
+    140▕ 
+  ➜ 141▕         $response->assertStatus(200);
+    142▕ 
+    143▕         foreach ($ids as $id) {
+    144▕             $this->assertDatabaseHas('wholesale_inquiries', [
+    145▕                 'id' => $id,
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WholesaleInquiryTest > admin can export inquiries                                              
+  Header [Content-Type] was found, but value [text/csv; charset=utf-8] does not match [text/csv].
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'text/csv'
++'text/csv; charset=utf-8'
+
+  at tests\Feature\WholesaleInquiryTest.php:162
+    158▕ 
+    159▕         $response = $this->actingAs($admin)->get('/api/v1/admin/wholesale/inquiries/export');
+    160▕ 
+    161▕         $response->assertStatus(200)
+  ➜ 162▕             ->assertHeader('Content-Type', 'text/csv');
+    163▕     }
+    164▕ }
+    165▕
+
+
+  Tests:    3 failed, 5 passed (22 assertions)
+  Duration: 15.90s
+

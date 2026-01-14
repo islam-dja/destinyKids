@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('phone');
             $table->string('business_type')->nullable(); // e.g., 'retailer', 'distributor', 'online_shop'
             $table->text('message');
-            $table->enum('status', ['new', 'reviewed', 'contacted', 'converted', 'rejected'])->default('new');
+            $table->enum('status', ['pending', 'reviewed', 'contacted', 'converted', 'rejected'])->default('pending');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->text('admin_notes')->nullable();
             $table->timestamps();
             

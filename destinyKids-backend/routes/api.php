@@ -54,9 +54,23 @@ Route::prefix('v1')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\CheckoutController::class, 'store']);
     });
     
-    // Wholesale routes (will be implemented in Phase 2)
+    // Wholesale routes
     Route::prefix('wholesale')->group(function () {
         Route::post('/inquiry', [\App\Http\Controllers\Api\WholesaleController::class, 'store']);
+    });
+
+    // Admin/Manager routes
+    Route::middleware(['auth:sanctum', 'role:admin,manager'])->prefix('admin')->group(function () {
+        Route::prefix('wholesale')->group(function () {
+            Route::get('/stats', [\App\Http\Controllers\Api\InquiryStatsController::class, 'index']);
+            Route::get('/inquiries', [\App\Http\Controllers\Api\WholesaleController::class, 'index']);
+            Route::get('/inquiries/export', [\App\Http\Controllers\Api\WholesaleController::class, 'export']);
+            Route::post('/inquiries/bulk-update', [\App\Http\Controllers\Api\WholesaleController::class, 'bulkUpdate']);
+            Route::get('/inquiries/{wholesaleInquiry}', [\App\Http\Controllers\Api\WholesaleController::class, 'show']);
+            Route::patch('/inquiries/{wholesaleInquiry}', [\App\Http\Controllers\Api\WholesaleController::class, 'update']);
+            Route::post('/inquiries/{wholesaleInquiry}/convert', [\App\Http\Controllers\Api\WholesaleController::class, 'convert']);
+            Route::delete('/inquiries/{wholesaleInquiry}', [\App\Http\Controllers\Api\WholesaleController::class, 'destroy']);
+        });
     });
     
     // Protected routes (authentication required)
