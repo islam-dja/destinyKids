@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { fetchProducts } from "@/lib/api";
+import { MOCK_BESTSELLERS } from "@/data/mockProducts";
 
 export default function Home() {
   const { addToCart } = useCart();
@@ -131,38 +132,41 @@ export default function Home() {
 
       {/* BESTSELLER SECTION */}
       <section className="py-[100px] px-[60px] bg-gradient-to-b from-[#fef7fb] via-purple-600 to-white text-center text-[#fef7fb]">
+        <div className="section-divider" />
         <h2 className="text-5xl text-white mb-3">Our Bestsellers</h2>
         <p className="text-xl mb-[50px] text-gray-800">
           These traditional dolls are loved by children and collectors alike.
         </p>
 
-        <div className="section-divider" />
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px] mb-[50px]">
-          {bestsellers.map((product) => (
-            <div
-              key={product.id ?? product._id ?? product.slug ?? product.name}
-              className="shine-effect bg-white rounded-[24px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] hover:-translate-y-2 hover:shadow-[0_18px_36px_rgba(0,0,0,0.15)] transition-all overflow-hidden relative"
-            >
-              <span className="absolute top-3 left-[-10px] bg-[#e8a9c1] text-[#3d1b4e] text-sm font-semibold px-3 py-1.5 rotate-[-20deg] shadow-md rounded">
-                Best Seller
-              </span>
-              <img
-                src={product.image || "/images/placeholder.png"}
-                alt={product.name || "Product"}
-                loading="lazy"
-                className="w-full h-[550px] object-cover rounded-2xl mb-[15px]"
-              />
-              <h3 className="text-[22px] text-purple-600">{product.name}</h3>
-              <p className="text-black font-bold my-2.5">{product.price} DZD</p>
-              <button
-                onClick={() => handleAddToCart(product)}
-                className="bg-purple-600 text-white px-7 py-3.5 rounded-[24px] text-lg hover:bg-purple-700 transition-colors"
+          {(bestsellers.length > 0 ? bestsellers : MOCK_BESTSELLERS).map(
+            (product) => (
+              <div
+                key={product.id ?? product._id ?? product.slug ?? product.name}
+                className="shine-effect bg-white rounded-[24px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] hover:-translate-y-2 hover:shadow-[0_18px_36px_rgba(0,0,0,0.15)] transition-all overflow-hidden relative"
               >
-                Add to Cart
-              </button>
-            </div>
-          ))}
+                <span className="absolute top-3 left-[-10px] bg-[#e8a9c1] text-[#3d1b4e] text-sm font-semibold px-3 py-1.5 rotate-[-20deg] shadow-md rounded">
+                  Best Seller
+                </span>
+                <img
+                  src={product.image || "/images/placeholder.png"}
+                  alt={product.name || "Product"}
+                  loading="lazy"
+                  className="w-full h-[550px] object-cover rounded-2xl mb-[15px]"
+                />
+                <h3 className="text-[22px] text-purple-600">{product.name}</h3>
+                <p className="text-black font-bold my-2.5">
+                  {product.price} DZD
+                </p>
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="bg-purple-600 text-white px-7 py-3.5 rounded-[24px] text-lg hover:bg-purple-700 transition-colors"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            ),
+          )}
         </div>
         <div className="section-divider" />
       </section>
