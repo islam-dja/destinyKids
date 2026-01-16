@@ -38,9 +38,14 @@ export default function Home() {
     async function load() {
       try {
         const resp = await fetchProducts("limit=3"); // Assuming backend supports limit
-        // Map backend product to frontend structure if necessary
-        // Backend typically returns { data: [...] }
-        setBestsellers(Array.isArray(resp?.data) ? resp.data : []);
+        // Accept either an array response or an object with a `data` array
+        if (Array.isArray(resp)) {
+          setBestsellers(resp);
+        } else if (Array.isArray(resp?.data)) {
+          setBestsellers(resp.data);
+        } else {
+          setBestsellers([]);
+        }
       } catch (err) {
         console.error("Failed to fetch bestsellers:", err);
       } finally {
@@ -119,14 +124,14 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="section-divider" />
-
       {/* BESTSELLER SECTION */}
       <section className="py-[100px] px-[60px] bg-gradient-to-b from-[#fef7fb] via-purple-600 to-white text-center text-[#fef7fb]">
         <h2 className="text-5xl text-white mb-3">Our Bestsellers</h2>
         <p className="text-xl mb-[50px] text-gray-800">
           These traditional dolls are loved by children and collectors alike.
         </p>
+
+        <div className="section-divider" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px] mb-[50px]">
           {bestsellers.map((product) => (
@@ -155,6 +160,7 @@ export default function Home() {
             </div>
           ))}
         </div>
+        <div className="section-divider" />
       </section>
 
       {/* ABOUT PREVIEW */}
