@@ -38,6 +38,7 @@ export default function Home() {
     async function load() {
       try {
         const resp = await fetchProducts("limit=3"); // Assuming backend supports limit
+        console.debug("fetchProducts resp:", resp);
         // Accept either an array response or an object with a `data` array
         if (Array.isArray(resp)) {
           setBestsellers(resp);
@@ -46,6 +47,10 @@ export default function Home() {
         } else {
           setBestsellers([]);
         }
+        console.debug(
+          "bestsellers set:",
+          Array.isArray(resp) ? resp.length : (resp?.data?.length ?? 0),
+        );
       } catch (err) {
         console.error("Failed to fetch bestsellers:", err);
       } finally {
@@ -136,17 +141,16 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px] mb-[50px]">
           {bestsellers.map((product) => (
             <div
-              key={product.id}
+              key={product.id ?? product._id ?? product.slug ?? product.name}
               className="shine-effect bg-white rounded-[24px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] hover:-translate-y-2 hover:shadow-[0_18px_36px_rgba(0,0,0,0.15)] transition-all overflow-hidden relative"
             >
               <span className="absolute top-3 left-[-10px] bg-[#e8a9c1] text-[#3d1b4e] text-sm font-semibold px-3 py-1.5 rotate-[-20deg] shadow-md rounded">
                 Best Seller
               </span>
-              <Image
-                src={product.image}
-                alt={product.name}
-                width={400}
-                height={550}
+              <img
+                src={product.image || "/images/placeholder.png"}
+                alt={product.name || "Product"}
+                loading="lazy"
                 className="w-full h-[550px] object-cover rounded-2xl mb-[15px]"
               />
               <h3 className="text-[22px] text-purple-600">{product.name}</h3>
