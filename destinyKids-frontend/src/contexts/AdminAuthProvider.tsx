@@ -8,6 +8,7 @@ type AuthState = {
   user: any | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  initialized?: boolean;
 };
 
 const AdminAuthContext = createContext<AuthState | undefined>(undefined);
@@ -15,16 +16,19 @@ const AdminAuthContext = createContext<AuthState | undefined>(undefined);
 export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [token, setToken] = useState<string | null>(() =>
-    typeof window !== "undefined"
-      ? localStorage.getItem("destiny_admin_token")
-      : null
-  );
-  const [role, setRole] = useState<string | null>(() =>
-    typeof window !== "undefined"
-      ? localStorage.getItem("destiny_admin_role")
-      : null
-  );
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  // Load persisted auth from localStorage on client mount to avoid
+  // hydration mismatches (server renders null, client should initially also be null).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedToken = localStorage.getItem("destiny_admin_token");
+    const storedRole = localStorage.getItem("destiny_admin_role");
+    if (storedToken) setToken(storedToken);
+    if (storedRole) setRole(storedRole);
+    setInitialized(true);
+  }, []);
   const [user, setUser] = useState<any | null>(null);
 
   useEffect(() => {
@@ -47,17 +51,28 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
-          if (!res.ok) throw new Error();
+          if (!res.ok) {
+            const err: any = new Error("Token validation failed");
+            err.status = res.status;
+            throw err;
+          }
           return res.json();
         })
-        .then((user) => setUser(user))
-        .catch(() => {
-          // Invalid token, clear it
-          setToken(null);
-          setRole(null);
-          setUser(null);
-          localStorage.removeItem("destiny_admin_token");
-          localStorage.removeItem("destiny_admin_role");
+        .then((user) => {
+          setUser(user);
+        })
+        .catch((err: any) => {
+          // Only clear token automatically on 401 Unauthorized.
+          if (err?.status === 401) {
+            console.debug("AdminAuth: token invalid (401), clearing auth");
+            setToken(null);
+            setRole(null);
+            setUser(null);
+            localStorage.removeItem("destiny_admin_token");
+            localStorage.removeItem("destiny_admin_role");
+          } else {
+            console.warn("AdminAuth: token validation error", err);
+          }
         });
     } else {
       setUser(null);
@@ -75,6 +90,12 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
       resp?.role ||
       null;
 
+    // Persist immediately so other provider instances see the token
+    if (typeof window !== "undefined") {
+      if (bearer) localStorage.setItem("destiny_admin_token", bearer);
+      if (userRole) localStorage.setItem("destiny_admin_role", userRole);
+    }
+
     setToken(bearer || null);
     setUser(userObj);
     setRole(userRole);
@@ -89,7 +110,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AdminAuthContext.Provider value={{ token, role, user, login, logout }}>
+    <AdminAuthContext.Provider
+      value={{ token, role, user, login, logout, initialized }}
+    >
       {children}
     </AdminAuthContext.Provider>
   );

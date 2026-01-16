@@ -9,14 +9,17 @@ import {
 import Sidebar from "./components/Sidebar";
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
-  const { token } = useAdminAuth();
+  const { token, initialized } = useAdminAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) {
+    // Only redirect after we've loaded persisted auth from storage
+    if (initialized && !token) {
       router.push("/login");
     }
-  }, [token, router]);
+  }, [initialized, token, router]);
+
+  if (!initialized) return null; // Wait for auth to initialize
 
   if (!token) return null; // Prevent rendering until redirect
 

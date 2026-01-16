@@ -21,11 +21,10 @@ async function request(path: string, opts: RequestInit = {}) {
 
   if (!res.ok) {
     if (res.status === 401) {
-      // Clear invalid token and redirect to login
-      localStorage.removeItem("destiny_admin_token");
-      localStorage.removeItem("destiny_admin_role");
-      window.location.href = "/login";
-      return; // Don't throw, as we're redirecting
+      // Let callers handle 401 (do not perform global redirect here).
+      const err401: any = new Error("Unauthorized");
+      err401.status = 401;
+      throw err401;
     }
     const text = await res.text();
     let json;
