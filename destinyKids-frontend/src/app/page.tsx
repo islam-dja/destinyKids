@@ -119,6 +119,8 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="section-divider" />
+
       {/* BESTSELLER SECTION */}
       <section className="py-[100px] px-[60px] bg-gradient-to-b from-[#fef7fb] via-purple-600 to-white text-center text-[#fef7fb]">
         <h2 className="text-5xl text-white mb-3">Our Bestsellers</h2>
