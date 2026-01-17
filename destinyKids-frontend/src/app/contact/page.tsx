@@ -4,6 +4,8 @@ export const metadata = {
     "Get in touch with Destiny Kids — wholesale, support, and custom orders.",
 };
 
+import ContactForm from "@/components/ContactForm";
+
 export default function ContactPage() {
   return (
     <main className="min-h-screen px-6 pt-32 pb-12">
@@ -64,7 +66,10 @@ export default function ContactPage() {
               </a>
             </div>
 
-            <div className="flex items-center gap-3">
+            {/* Contact form (client) */}
+            <ContactForm />
+
+            <div className="flex items-center gap-3 mt-6">
               <strong className="mr-2">Follow us:</strong>
               <a
                 aria-label="Instagram"
